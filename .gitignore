@@ -1,0 +1,23 @@
+# ==============================================================================
+# simply todo - Checklist Backend Git Ignore (.gitignore)
+# ==============================================================================
+
+# --- Secrets & Environment ---
+.env
+.env.local
+
+# --- Go Binaries & Build Artifacts ---
+# Compiled binaries (output of 'go build')
+bin/
+dist/
+checklist-backend
+
+# --- Dependencies ---
+# We use go.mod/go.sum, so we don't usually commit the vendor folder.
+vendor/
+
+# --- IDE & OS Junk ---
+.vscode/
+.idea/
+.DS_Store
+*.log
