@@ -1,0 +1,27 @@
+# ==============================================================================
+# simply todo - Checklist Backend Docker Ignore (.dockerignore)
+# ==============================================================================
+
+# --- Git & History ---
+.git
+.gitignore
+
+# --- Documentation ---
+README.md
+LICENSE
+docs/
+
+# --- Local Secrets ---
+# We inject these via docker-compose, not by baking them into the image.
+.env
+.env.example
+
+# --- Build Artifacts ---
+# Prevents host-machine binaries from interfering with the container build.
+bin/
+dist/
+checklist-backend
+
+# --- IDEs ---
+.vscode
+.idea
