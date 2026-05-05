@@ -1,0 +1,83 @@
+# ==============================================================================
+# simply todo - Checklist Backend Orchestration (docker-compose.yml)
+# ==============================================================================
+# Repository: checklist-backend
+# License: Apache 2.0
+# Purpose: Orchestrates the Go Worker, establishes the vault connection, 
+#          and joins the existing simply-todo infrastructure network.
+# ==============================================================================
+
+# Defines the overall project name to group services in Docker
+name: simply-todo-backend-worker
+
+services:
+  checklist-backend:
+    # --------------------------------------------------------------------------
+    # 1. Container Identity
+    # --------------------------------------------------------------------------
+    container_name: checklist-backend
+    
+    # --------------------------------------------------------------------------
+    # 2. Build Instructions
+    # --------------------------------------------------------------------------
+    # Uses our professional multi-stage Dockerfile.
+    # Context is '.' (root) so Docker can access go.mod and internal/ folders.
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      
+    # --------------------------------------------------------------------------
+    # 3. Port Mapping
+    # --------------------------------------------------------------------------
+    # Maps internal Go port 8001 to host port 8001.
+    # This allows the future Router (port 8000) to reach this service.
+    ports:
+      - "8001:8001"
+      
+    # --------------------------------------------------------------------------
+    # 4. Environment Injection
+    # --------------------------------------------------------------------------
+    # Reads the DATABASE_URL and AUTH tokens from your local .env file.
+    env_file:
+      - .env
+      
+    # --------------------------------------------------------------------------
+    # 5. Dependency Handshake (CRITICAL)
+    # --------------------------------------------------------------------------
+    # This service will wait to start until the 'postgres-db' container 
+    # (defined in our todo-db repo) reports a 'healthy' status.
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+        
+    # --------------------------------------------------------------------------
+    # 6. Network Connectivity
+    # --------------------------------------------------------------------------
+    # Joins the shared bridge network so it can resolve 'postgres-db' by name.
+    networks:
+      - todo-network
+
+    # --------------------------------------------------------------------------
+    # 7. Reliability & Logging
+    # --------------------------------------------------------------------------
+    restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10mb"
+        max-file: "3"
+
+# ==============================================================================
+# External Infrastructure Definitions
+# ==============================================================================
+# These must match the names we defined in the todo-db repository exactly.
+# We mark them as 'external: true' because they are managed by the db repo.
+
+networks:
+  todo-network:
+    external: true
+    name: simply-todo-network
+
+# Reference to the DB container if it's running in a separate compose project
+# Note: In a production 'simply-todo' stack, these might be in one file, 
+# but for our modular repo strategy, we reference the external vault.
